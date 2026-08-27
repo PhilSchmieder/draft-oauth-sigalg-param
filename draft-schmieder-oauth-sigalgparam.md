@@ -23,9 +23,13 @@ venue:
 
 author:
  -
-    fullname: "Phil Schmieder"
+    fullname: "Ethan Heilman"
     organization: Cloudflare
-    email: "pschmieder@cloudflare.com"
+    email: "eheilman@cloudflare.com"
+ -
+    fullname: "Phil Schmieder"
+    organization: University of Wuppertal
+    email: "schmieder@uni-wuppertal.de"
 
 normative:
   OpenID.Core:
