@@ -2,10 +2,11 @@
 
 
 
-Web Authorization Protocol                                  P. Schmieder
+Web Authorization Protocol                                    E. Heilman
 Internet-Draft                                                Cloudflare
-Intended status: Standards Track                          25 August 2026
-Expires: 26 February 2027
+Intended status: Standards Track                            P. Schmieder
+Expires: 28 February 2027                        University of Wuppertal
+                                                          27 August 2026
 
 
   Per-Request ID Token Signing Algorithm Selection for OpenID Connect
@@ -63,7 +64,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 26 February 2027.
+   This Internet-Draft will expire on 28 February 2027.
 
 Copyright Notice
 
@@ -97,7 +98,7 @@ Table of Contents
      8.1.  Normative References
      8.2.  Informative References
    Acknowledgments
-   Author's Address
+   Authors' Addresses
 
 1.  Introduction
 
@@ -389,8 +390,13 @@ Acknowledgments
 
    TODO acknowledge.
 
-Author's Address
+Authors' Addresses
+
+   Ethan Heilman
+   Cloudflare
+   Email: eheilman@cloudflare.com
+
 
    Phil Schmieder
-   Cloudflare
-   Email: pschmieder@cloudflare.com
+   University of Wuppertal
+   Email: schmieder@uni-wuppertal.de
