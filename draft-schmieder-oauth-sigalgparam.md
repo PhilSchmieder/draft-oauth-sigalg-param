@@ -23,13 +23,13 @@ venue:
 
 author:
  -
-    fullname: "Ethan Heilman"
-    organization: Cloudflare
-    email: "eheilman@cloudflare.com"
- -
     fullname: "Phil Schmieder"
     organization: University of Wuppertal
     email: "schmieder@uni-wuppertal.de"
+ -
+    fullname: "Ethan Heilman"
+    organization: Cloudflare
+    email: "eheilman@cloudflare.com"
 
 normative:
   OpenID.Core:
@@ -97,7 +97,7 @@ OpenID Connect (OIDC) enables a Relying Party (RP) to register an algorithm for 
 Additionally, OIDC RP Metadata enables RPs to specify support for multiple algorithms.
 However, neither mechanism enables an RP to choose an algorithm to secure an ID Token on a request-by-request basis.
 -->
-This document addresses that by introducing the `response_signing_alg` request parameter for the OAuth 2.0 authorization endpoint and the `response_signing_alg_parameter_supported` Authorization Server metadata flag indicating support of that parameter.
+This document introduces the `response_signing_alg` request parameter for the OAuth 2.0 authorization endpoint and the `response_signing_alg_parameter_supported` Authorization Server metadata flag indicating support of that parameter.
 The `response_signing_alg` request parameter specifies which algorithm must be used to protect the JWTs that are subsequently obtained by calling the token endpoint.
 For Clients dealing with multiple verifying services this improves cryptographic agility when different algorithms are supported among these services.
 This can, for example, support smooth transition processes from one algorithm to another such as for the transition towards post-quantum cryptography.
