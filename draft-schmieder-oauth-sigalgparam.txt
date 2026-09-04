@@ -2,11 +2,11 @@
 
 
 
-Web Authorization Protocol                                    E. Heilman
-Internet-Draft                                                Cloudflare
-Intended status: Standards Track                            P. Schmieder
-Expires: 5 March 2027                            University of Wuppertal
-                                                        1 September 2026
+Web Authorization Protocol                                  P. Schmieder
+Internet-Draft                                   University of Wuppertal
+Intended status: Standards Track                              E. Heilman
+Expires: 8 March 2027                                         Cloudflare
+                                                        4 September 2026
 
 
        Per-Request JWT Signing Algorithm Selection for OAuth 2.0
@@ -14,8 +14,8 @@ Expires: 5 March 2027                            University of Wuppertal
 
 Abstract
 
-   This document addresses that by introducing the response_signing_alg
-   request parameter for the OAuth 2.0 authorization endpoint and the
+   This document introduces the response_signing_alg request parameter
+   for the OAuth 2.0 authorization endpoint and the
    response_signing_alg_parameter_supported Authorization Server
    metadata flag indicating support of that parameter.  The
    response_signing_alg request parameter specifies which algorithm must
@@ -59,7 +59,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 5 March 2027.
+   This Internet-Draft will expire on 8 March 2027.
 
 Copyright Notice
 
@@ -390,11 +390,11 @@ Acknowledgments
 
 Authors' Addresses
 
-   Ethan Heilman
-   Cloudflare
-   Email: eheilman@cloudflare.com
-
-
    Phil Schmieder
    University of Wuppertal
    Email: schmieder@uni-wuppertal.de
+
+
+   Ethan Heilman
+   Cloudflare
+   Email: eheilman@cloudflare.com
