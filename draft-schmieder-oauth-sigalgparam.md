@@ -98,7 +98,7 @@ Additionally, OIDC RP Metadata enables RPs to specify support for multiple algor
 However, neither mechanism enables an RP to choose an algorithm to secure an ID Token on a request-by-request basis.
 -->
 This document introduces the `response_signing_alg` request parameter for the OAuth 2.0 authorization endpoint and the `response_signing_alg_parameter_supported` Authorization Server metadata flag indicating support of that parameter.
-The `response_signing_alg` request parameter specifies which algorithm must be used to protect the JWTs that are subsequently obtained by calling the token endpoint.
+The `response_signing_alg` request parameter specifies which algorithm must be used to protect the Open ID Connect ID Token that is subsequently obtained by calling the token endpoint.
 For Clients dealing with multiple verifying services this improves cryptographic agility when different algorithms are supported among these services.
 This can, for example, support smooth transition processes from one algorithm to another such as for the transition towards post-quantum cryptography.
 
@@ -108,15 +108,19 @@ This can, for example, support smooth transition processes from one algorithm to
 
 {{?RFC9964}} introduces JSON Object Signing and Encryption (JOSE) bindings for the three ML-DSA variants standardized by the US NIST in {{FIPS204}}.
 This paves the way to use ML-DSA signatures to secure JSON Web Tokens (JWTs).
-However, the adoption of ML-DSA is hindered by the need to support verifying services that do not (yet) implement ML-DSA verification.
-Consequently, a OAuth Client can decide to handle the migration towards post-quantum security by pushing out the switch to ML-DSA until every service supports ML-DSA.
+However, the adoption of ML-DSA in Open ID Connect (OIDC) is hindered by the need to support verifying services that do not (yet) implement ML-DSA verification.
+Consequently, a Client can decide to handle the migration towards post-quantum security by pushing out the switch to ML-DSA until every service supports ML-DSA.
 That causes Clients to remain with RS256 (or potentially other quantum vulnerable signature algorithms) as a primary choice for longer and not offer ML-DSA signed JWTs.
 
-This document introduces a mechanism for relying parties to specify which JSON Web Signature (JWS) algorithm is to be used to secure JWTs in OAuth 2.0 on a request-by-request basis.
+This document introduces a mechanism for relying parties to specify which JSON Web Signature (JWS) algorithm is to be used to secure OIDC ID Tokens on a request-by-request basis.
 Using this mechanism, Clients transitioning towards post-quantum security can begin using post-quantum secure JWTs before every verifying party behind that Client supports a given novel algorithm.
 
-To achieve this, this document introduces the `response_signing_alg` request parameter specifying the JWS algorithm that is to be used to secure the JWT in the token endpoint response.
+To achieve this, this document introduces the `response_signing_alg` request parameter specifying the JWS algorithm that is to be used to secure the ID Token in the token endpoint response.
 Additionally, this document specifies the `response_signing_alg_parameter_supported` Authorization Server metadata flag indicating support for the aforementioned request parameter.
+
+This document is scoped to the ID Token, specifically motivated by the scenario where distinct services validate ID Tokens from one Client.
+The same per-request mechanism could be extended to other JWTs issued by an Authorization Server (e.g., JWT access tokens {{!RFC9068}} or UserInfo responses).
+This is out of scope for this document.
 
 While the main motivation of this proposal is the ongoing transition of deployed security mechanisms towards post-quantum secure cryptography, the specified parameter increases the cryptographic agility of OAuth 2.0 in general.
 
@@ -130,15 +134,20 @@ This specification uses the terms “Authentication Request”, “ID Token”, 
 This specification uses the terms "JSON Web Signature (JWS)" and "alg Header Parameter" as defined by {{!RFC7515}}, and "JSON Web Token (JWT)" as defined by {{!RFC7519}}.
 The terms "Authorization Server", "Authorization Request", and "Client" are used as defined in {{!RFC6749}}.
 The JSON Web Algorithms (JWA) specification {{!RFC7518}} defines cryptographic algorithms used with JWS.
+The term "ID Token" is used as defined in {{OpenID.Core}}.
+The term "Request Object" is used as defined in {{!RFC9101}}.
 
 # Request Parameter {#sig-alg-param}
-When a Authorization Request is constructed the client can opt to include the following parameter using the "application/x-www-form-urlencoded" format, per {{Appendix B of !RFC6749}}:
+When an Authorization Request is constructed the client can opt to include the following parameter using the "application/x-www-form-urlencoded" format, per {{Appendix B of !RFC6749}}:
 
 {:vspace}
 `response_signing_alg`
-: OPTIONAL. The JWS `alg` value requested for protecting the JWTs in the response of the subsequent token request.
+: OPTIONAL. The JWS `alg` value requested for protecting the ID Token in the response of the subsequent token request.
 
-For example, building on the Authorization Request from {{Section 4.1.1 of RFC6749}}, a URI can specify that ML-DSA-44 should be used to secure the JWTs of a subsequent token request as follows (added line breaks are for legibility):
+The `response_signing_alg` parameter MAY be transmitted in the query string of the Authorization Request URI, or in the body of an `application/x-www-form-urlencoded` POST request, or in a Request Object as defined in {{!RFC9101}}, which MAY be delivered by reference using pushed Authorization Requests as defined in {{!RFC9126}}.
+If the `response_signing_alg` parameter is present in both a Request Object and in the accompanying outer Authorization Request, the value present in the Request Object takes precedence, as required by {{Section 3 of RFC9101}}.
+
+For example, building on the Authorization Request from {{Section 4.1.1 of RFC6749}}, a URI can specify that ML-DSA-44 should be used to secure the ID Token of a subsequent token request as follows (added line breaks are for legibility):
 
 ~~~ http
 GET /authorize
@@ -165,19 +174,19 @@ An Authorization Server that supports the signing algorithm selection parameter 
 Before requesting a specific algorithm using the `response_signing_alg` request parameter, a Client SHOULD verify that:
 
 - The `response_signing_alg_parameter_supported` parameter in the Authorization Server's metadata is set to true.
-- The Authorization Server supports the specified algorithm, i.e. advertises support in its `token_endpoint_auth_signing_alg_values_supported` list as specified in {{!RFC8414}}.
+- The Authorization Server supports the specified algorithm, i.e. advertises support in its `id_token_signing_alg_values_supported` list as specified in {{OpenID.Discovery}}.
 
-Upon receipt of an Authorization Request, an Authorization Server supporting the `response_signing_alg` parameter MUST use this choice of algorithm to secure the JWTs in the token response corresponding to the Authorization Request if:
+Upon receipt of an Authorization Request, an Authorization Server supporting the `response_signing_alg` parameter MUST use this choice of algorithm to secure the ID Token in the token response corresponding to the Authorization Request if:
 
 - The `response_signing_alg` parameter exists and contains a valid JWS algorithm.
-- The Authorization Server supports the specified algorithm, i.e. advertises support in its `token_endpoint_auth_signing_alg_values_supported` list as specified in {{!RFC8414}}.
+- The Authorization Server supports the specified algorithm, i.e. advertises support in its `id_token_signing_alg_values_supported` list as specified in {{OpenID.Discovery}}.
 - The Client supports the specified algorithm, i.e. advertises support in its `id_token_signing_alg_values_supported` list as specified in {{OpenID.RPMetadataChoices}}.
 - The algorithm is permitted for that Client by Authorization Server policy.
 - Relevant signing key material is available.
 
 If the `response_signing_alg` parameter is present and any of the aforementioned requirements are not met, the Authorization Server MUST reject the request with the `invalid_request` error as defined in {{Section 4.1.2.1 of RFC6749}} and Section 3.1.2.6 of {{OpenID.Core}}.
 
-If the `response_signing_alg` parameter is not specified, an Authorization Server supporting this parameter MUST proceed with algorithm selection according to existing algorithm selection mechanism.
+If the `response_signing_alg` parameter is not specified, an Authorization Server supporting this parameter MUST proceed with algorithm selection according to existing algorithm selection mechanisms.
 If the `response_signing_alg` is specified and the aforementioned checks succeed, this choice of algorithm MUST take precedence over other algorithm selection mechanisms for this request.
 This includes the `id_token_signed_response_alg` parameter as defined in {{OpenID.Registration}}.
 This is an exception to the {{OpenID.Registration}} specification.
@@ -187,22 +196,25 @@ An Authorization Server not supporting the `response_signing_alg` parameter MUST
 
 When an Authorization Server accepts a request specifying the `response_signing_alg`, the Authorization Server MUST associate the JWS algorithm with the authorization transaction and the authorization code it returns.
 On a subsequent token request, the JWS algorithm associated with the authorization code MUST be used to secure the JWT.
+The association MUST be discarded when the authorization code expires or is otherwise invalidated.
+Since authorization codes MUST be short-lived and single-use, a token request presenting an unknown or already consumed authorization code MUST be rejected with the `invalid_grant` error, as required by {{Section 10 of RFC6749}} and {{Section 5.2 of RFC6749}}.
 
 # Security Considerations {#security}
 
 ## URI Parameter May Expose Migration Status of Verifying Service
-Depending on the usage of the Authorization Request an attacker might be able to deduce which service of an Client verifies the JWT.
+Depending on the usage of the Authorization Request an attacker might be able to deduce which service of a Client verifies the ID Token.
 A public algorithm choice reveals which algorithm is supported by that service and may indicate which algorithm is not supported.
 This may become a problem if a service can be identified that uses insecure cryptography and is subsequently attacked because of it.
-
-TODO: Is this a problem? Parameters can also be specified in other locations e.g. the request body of a POST request, pushed Authorization Requests, etc. That would fix the problem. Should we also specify that?
+Clients that do not want to expose the algorithm choice in the Authorization Request URI SHOULD transmit the `response_signing_alg` parameter in the body of a POST request or in a pushed Authorization Request as specified in {{sig-alg-param}}.
 
 ## Downgrade and Confusion Attacks
-If the `response_signing_alg` is transmitted without integrity protection, attackers can delete or modify it.
+If the `response_signing_alg` is transmitted without integrity protection, e.g. as part of the Authorization Request URI, attackers can delete or modify it.
 This potentially results in a downgrade or confusion attack.
-To mitigate this, each JWT consuming service MUST keep an algorithm allowlist and reject JWTs secured by algorithms that are not explicitly listed there, as required by Sections 3.1 and 3.2 of {{!RFC8725}}.
-Additionally, for every Authorization Request made where the `response_signing_alg` is specified, the algorithm used to secure the JWTs returned on a subsequent token request MUST be checked.
-If the algorithm used to secure the JWT is not the previously specified one, the token MUST be rejected.
+To mitigate this, each ID Token consuming service MUST keep an algorithm allowlist and reject ID Tokens secured by algorithms that are not explicitly listed there, as required by Sections 3.1 and 3.2 of {{!RFC8725}}.
+Additionally, for every Authorization Request made where the `response_signing_alg` is specified without integrity protection, the algorithm used to secure the ID Tokens returned on a subsequent token request MUST be checked.
+If the algorithm used to secure the ID Token is not the previously specified one, the token MUST be rejected.
+
+To protect against downgrade and confusion attacks, the `response_signing_alg` SHOULD be used in an integrity-protected Request Object.
 
 # IANA Considerations {#iana}
 
@@ -230,7 +242,7 @@ Metadata Name:
 : `response_signing_alg_parameter_supported`
 
 Metadata Description:
-: Boolean value indicating whether the Authorization Server supports the request-by-request signature selection request for Authorization Requests as specified in {{sig-alg-param}} of this document.
+: Boolean value indicating whether the Authorization Server supports the request-by-request signature selection specified in {{sig-alg-param}} of this document.
 
 Change Controller:
 : IESG
